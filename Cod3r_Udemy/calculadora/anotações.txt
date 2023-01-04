@@ -1,0 +1,9 @@
+topico 1 - inital state recebe os valores iniciais, dentro
+		da função, o "state" recebe os parametros do initial state
+		através do ... (que é um .push), as funções abaixo, alteram
+		o objeto state, o displayValue é o valor atual ao ser clicado
+
+topico 2 - o display só é alterado ser for usado o setState, se for usado apenas o this.state.displayValue
+		a variavel em sí é alterada, porém, não é informada ao props que foi alterada, sendo assim, 
+		para informar e alterar a variavel, é preciso usar o set (nesse caso, setState) e passar
+		a constate criada como pararmetro, igual acontece com o json

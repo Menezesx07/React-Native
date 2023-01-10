@@ -36,7 +36,7 @@ export default class MainView extends Component {
     const clearDisplay = this.state.displayValue === '0' || this.state.clearDisplay
 
     //se eu já tiver adicionado um ponto, e adicionar outro, vai retornar vazio
-    if (n === '.' && this.state.displayValue.includes('.')) {
+    if (n === '.' && !clearDisplay && this.state.displayValue.includes('.')) {
         return 
     }
 
@@ -57,9 +57,11 @@ export default class MainView extends Component {
     //vai ser uma operação valida
     if (n !== ".") {
         const newValue = parseFloat(displayValue) //transformando o valor em float (0.00)
-        const value = [...this.state.values] //clonando o array do state
-        value[this.state.current] = newValue //setando o valor atual (current) do array novo
+        const values = [...this.state.values] //clonando o array do state
+        values[this.state.current] = newValue //setando o valor atual (current) do array novo
+        this.setState({ values })
     }
+    
     }
 
     
@@ -69,7 +71,6 @@ export default class MainView extends Component {
     //zerando o display, os operadores, e os numeros na memoria
     clearMemory = () => {
         this.setState({...initialState})
-        console.warn("clear")
     }
 
     check = () => {
@@ -80,7 +81,41 @@ export default class MainView extends Component {
 
     //armazenando qual operação vai ser feita
     setOperation = operation => {
+        
+        
+        if(this.state.current === 0) { //se a posição do array for a 0
+            this.setState({ operation, current: 1, clearDisplay: true }) 
+            //vai setar a operação com o caractere, alterar o array par 1 e zerar o display
 
+        } else { //mas se o current for 1 (se já estiver uma operação setada)
+            const equals = operation === "="
+            const values = [...this.state.values] //clonando o array
+
+            
+            try {
+                //anotação sobre o eval no final do codigo
+                //pegar o item 0 do array, caracter do operation e o indice 1 do array
+                values[0] = eval(`${values[0]} ${this.state.operation} ${values[1]}`) 
+                
+            } catch (e) {
+
+                values[0] = this.state.values[0] //não faz nada caso der erro (passar o = como parametro)
+
+            }
+
+            //zerando o valor do item 1 para começar uma nova operação
+            values [1] = 0
+            this.setState({
+                displayValue: `${values[0]}`,
+                //se a operação for = o numero do display vai zerar, mas se não, vai setar a variavel para a nova operação
+                operation: equals ? null : operation,
+                //se for = ele vai vai da continuidade alterando o indice 0, se for um + por exemplo, vai continuar editando o item 1
+                current: equals ? 0 : 1 ,
+                clearDisplay: !equals,
+                values,
+            })
+            
+        } 
     }
 
        render() {
@@ -97,18 +132,18 @@ export default class MainView extends Component {
                     <Buttons label='7' onClick={() => this.addDigit(7)}/>
                     <Buttons label='8' onClick={() => this.addDigit(8)}/>
                     <Buttons label='9' onClick={() => this.addDigit(9)}/>
-                    <Buttons label='*' operation/>
+                    <Buttons label='*' operation onClick={() => this.setOperation("*")}/>
                     <Buttons label='4' onClick={() => this.addDigit(4)}/>
                     <Buttons label='5' onClick={() => this.addDigit(5)}/>
                     <Buttons label='6' onClick={() => this.addDigit(6)}/>
-                    <Buttons label='-' operation/>
+                    <Buttons label='-' operation onClick={() => this.setOperation("-")}/>
                     <Buttons label='1' onClick={() => this.addDigit(1)}/>
                     <Buttons label='2' onClick={() => this.addDigit(2)}/>
                     <Buttons label='3' onClick={() => this.addDigit(3)}/>
-                    <Buttons label='+' operation/>
+                    <Buttons label='+' operation onClick={() => this.setOperation("+")}/>
                     <Buttons label='0' double onClick={() => this.addDigit(0)}/>
                     <Buttons label='.' onClick={() => this.addDigit(".")}/>
-                    <Buttons label='=' operation onClick={() => this.setOperation("/")}/>
+                    <Buttons label='=' operation onClick={() => this.setOperation("=")}/>
     
                 </View>
     
@@ -120,3 +155,13 @@ export default class MainView extends Component {
     
 
 }
+
+
+
+/*
+EVAL:
+eval é uma função do js que calcula numeros em forma de string
+sem precisar fazer um parseInt para os numeros, no caso dos caracteres
+ele também reconhece mesmo sendo uma string, então não precisa fazer um switch 
+por exemplo e dizer qual caracter vai fazer tal coisa, visto com o evail já 
+faz isso automaticamente*/
